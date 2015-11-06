@@ -25,9 +25,9 @@ maketest() {
 	; do
 		local h1="${h1_url%%=*}"
 		local url="${h1_url#*=}"
-		local v="$(url_split "$url" "$fmt")"
+		local v="$(url_split_export "$url" "$fmt")"
 		printf -- '-%s\n' "$url"
-		url_split "$url" "+$fmtinline"
+		url_split_export "$url" "+$fmtinline"
 
 		continue
 
@@ -38,9 +38,9 @@ maketest() {
 		h2="${h2%% *}"
 		[ "$h1" = "$h2" ] && echo "ok: $url" || {
 			echo "FAIL: $url ($h1 != $h2)";
-			url_split "$url" "$fmt"
+			url_split_export "$url" "$fmt"
 		}
-		url_split "$url" --export
+		url_split_export "$url" --export
 		local url2="$(url_join)"
 		if [ "$url" != "$url2" ]; then
 			echo >&2 "- $url"
@@ -56,7 +56,7 @@ test_one() {
 	local want="$1"; shift
 	local fmtinline='scheme=%s user=%s pass=%s host=%s port=%s path=%s args=%s\n'
 	W "$want"
-	TESTVALUE "$(SUMVALUE "$(url_split "$url" "$fmtinline")")" "$url"
+	TESTVALUE "$(SUMVALUE "$(url_split_export "$url" "$fmtinline")")" "$url"
 	N ++
 }
 

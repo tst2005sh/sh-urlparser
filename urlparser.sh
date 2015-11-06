@@ -101,7 +101,7 @@ url_parse_port_uri_args_ipv4rfc() {
 url_split() {
 	local url="$1"; shift ;# https://user:pass@host:port/uri?args
 
-	local scheme="${url%%://*}"			;# <scheme>://...
+	scheme="${url%%://*}"				;# <scheme>://...
 	[ "$scheme" = "$url" ] && scheme=""		;# no scheme 
 
 	local url2="$url"
@@ -110,11 +110,9 @@ url_split() {
 	local user_pass="${url2%%@*}"			;# [<user>[:<pass>]
 	[ "$user_pass" = "$url2" ] && user_pass=""	;# no such user/pass
 
-	local user pass
 	url_parse_user_pass "$user_pass"
 
 	local url3="${url2#*@}"				;# <host>[:<port>][<uri>[?<args>]]
-	local host port uri_args
 
 	if [ "$(printf '%1c' "$url3")" = '[' ]; then
 		# IPv6
@@ -134,8 +132,14 @@ url_split() {
 		fi
 	fi
 
-	local uri args
 	url_parse_uri_args "$uri_args"
+}
+
+url_split_export() {
+	local url="$1"; shift ;# https://user:pass@host:port/uri?args
+
+	local scheme user pass host port uri_args uri args
+	url_split "$url"
 
 	if [ "$1" = "--export" ]; then
 		URL_SCHEME="$scheme"; URL_USER="$user"; URL_PASS="$pass"; URL_HOST="$host"; URL_PORT="$port"; URL_URI="$uri"; URL_ARGS="$args"
