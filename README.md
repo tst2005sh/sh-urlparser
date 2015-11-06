@@ -44,6 +44,19 @@ $ sh test.url-parser.sh
 [FAIL] test-015 :  (http://[host]?xxx=yyy/zzz)                    wanted '397aa7dd' but got '5f44d1b1'
 ```
 
+```
+$ sh test.urlparser2.sh
+- https://github.com/tst2005/sh-urlparser/ (original)
+  https://github.com/tst2005/sh-urlparser/ (parsed, splited, recontructed)
+
+- ssh://git@github.com/tst2005/sh-urlparser.git (original)
+  ssh://git@github.com/tst2005/sh-urlparser.git (parsed, splited, recontructed)
+
+- git@github.com:tst2005/sh-urlparser.git (original)
+  ssh://git@github.com/tst2005/sh-urlparser.git (parsed, splited, recontructed)
+
+```
+
 See also
 ========
 

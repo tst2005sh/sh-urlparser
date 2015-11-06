@@ -41,7 +41,7 @@ maketest() {
 			url_split_export "$url" "$fmt"
 		}
 		url_split_export "$url" --export
-		local url2="$(url_join)"
+		local url2="$(url_join_export)"
 		if [ "$url" != "$url2" ]; then
 			echo >&2 "- $url"
 			echo >&2 "+ $url2"

@@ -25,7 +25,7 @@
 # An alternative scp-like syntax may also be used with the ssh protocol:
 #	         [user@]host.xz:path/to/repo.git/
 
-url_join() {
+url_join_export() {
 	local r=""
 	[ -n "$URL_SCHEME" ] && r="$URL_SCHEME://" || r='ssh://'
 	[ -n "$URL_USER" ] && {
@@ -40,6 +40,22 @@ url_join() {
 	[ -n "$URL_ARGS"   ] && r="${r}?$URL_ARGS"
 	printf '%s\n' "$r"
 }
+url_join() {
+	local r=""
+	[ -n "$scheme" ] && r="$scheme://" || r='ssh://'
+	[ -n "$user" ] && {
+		r="${r}${user}"
+		[ -n "$pass" ] && r="${r}:${pass}"
+		r="${r}@"
+	}
+	r="${r}$host" ;# FIXME: IPv6 '[' + host + ']'
+	[ -n "$port"   ] && r="${r}:$port"
+	[ -z "$scheme" ] && [ -n "${uri%%/*}" ] && r="${r}/"
+	[ -n "$uri"    ] && r="${r}$uri"
+	[ -n "$args"   ] && r="${r}?$args"
+	printf '%s\n' "$r"
+}
+
 
 url_parse_user_pass() {
 	local user_pass="$1"
