@@ -2,7 +2,7 @@
 . ./urlparser.sh
 
 t() {
-	local scheme user pass host port uri_args uri args
+	local URL_SCHEME URL_USER URL_PASS URL_HOST URL_PORT URL_URI URL_ARGS URL_URI_ARGS
 	url_split "$1"
 	printf -- '- %s (original)\n  %s (parsed, splited, recontructed)\n\n' "$1" "$(url_join)"
 

@@ -25,7 +25,7 @@
 # An alternative scp-like syntax may also be used with the ssh protocol:
 #	         [user@]host.xz:path/to/repo.git/
 
-url_join_export() {
+url_join() {
 	local r=""
 	[ -n "$URL_SCHEME" ] && r="$URL_SCHEME://" || r='ssh://'
 	[ -n "$URL_USER" ] && {
@@ -40,22 +40,6 @@ url_join_export() {
 	[ -n "$URL_ARGS"   ] && r="${r}?$URL_ARGS"
 	printf '%s\n' "$r"
 }
-url_join() {
-	local r=""
-	[ -n "$scheme" ] && r="$scheme://" || r='ssh://'
-	[ -n "$user" ] && {
-		r="${r}${user}"
-		[ -n "$pass" ] && r="${r}:${pass}"
-		r="${r}@"
-	}
-	r="${r}$host" ;# FIXME: IPv6 '[' + host + ']'
-	[ -n "$port"   ] && r="${r}:$port"
-	[ -z "$scheme" ] && [ -n "${uri%%/*}" ] && r="${r}/"
-	[ -n "$uri"    ] && r="${r}$uri"
-	[ -n "$args"   ] && r="${r}?$args"
-	printf '%s\n' "$r"
-}
-
 
 url_parse_user_pass() {
 	local user_pass="$1"
@@ -117,19 +101,20 @@ url_parse_port_uri_args_ipv4rfc() {
 url_split() {
 	local url="$1"; shift ;# https://user:pass@host:port/uri?args
 
-	scheme="${url%%://*}"				;# <scheme>://...
+	local scheme="${url%%://*}"			;# <scheme>://...
 	[ "$scheme" = "$url" ] && scheme=""		;# no scheme 
 
-	local url2="$url"
-	[ -n "$scheme" ] && url2="${url#*://}"		;# url without scheme = [<user>[:<pass>]@]<host>[:<port>][<uri>[?<args>]]
+	[ -z "$scheme" ] || url="${url#*://}"		;# url without scheme = [<user>[:<pass>]@]<host>[:<port>][<uri>[?<args>]]
 
-	local user_pass="${url2%%@*}"			;# [<user>[:<pass>]
-	[ "$user_pass" = "$url2" ] && user_pass=""	;# no such user/pass
+	local user_pass="${url%%@*}"			;# [<user>[:<pass>]
+	[ "$user_pass" = "$url" ] && user_pass=""	;# no such user/pass
 
+	local user pass
 	url_parse_user_pass "$user_pass"
 
-	local url3="${url2#*@}"				;# <host>[:<port>][<uri>[?<args>]]
+	local url3="${url#*@}"				;# <host>[:<port>][<uri>[?<args>]]
 
+	local host port uri_args
 	if [ "$(printf '%1c' "$url3")" = '[' ]; then
 		# IPv6
 		host="${url3%%]*}]"
@@ -148,21 +133,20 @@ url_split() {
 		fi
 	fi
 
+	local uri args
 	url_parse_uri_args "$uri_args"
+
+	URL_SCHEME="$scheme"; URL_USER="$user"; URL_PASS="$pass"; URL_HOST="$host"; URL_PORT="$port"; URL_URI="$uri"; URL_ARGS="$args"
+	URL_URI_ARGS="$uri_args"
 }
 
-url_split_export() {
+url_split_debug() {
 	local url="$1"; shift ;# https://user:pass@host:port/uri?args
-
-	local scheme user pass host port uri_args uri args
+	local URL_SCHEME URL_USER URL_PASS URL_HOST URL_PORT URL_URI URL_ARGS URL_URI_ARGS
 	url_split "$url"
 
-	if [ "$1" = "--export" ]; then
-		URL_SCHEME="$scheme"; URL_USER="$user"; URL_PASS="$pass"; URL_HOST="$host"; URL_PORT="$port"; URL_URI="$uri"; URL_ARGS="$args"
-	else
-		local fmt="$1"; shift
-		[ -z "$fmt" ] && fmt='s=%s u=%s p=%s h=%s p=%s u=%s a=%s\n'
-		printf "$fmt"  "$scheme"  "$user"  "$pass"  "$host"  "$port"  "$uri"  "$args"
-	fi
+	local fmt="$1"; shift
+	[ -z "$fmt" ] && fmt='s=%s u=%s p=%s h=%s p=%s u=%s a=%s\n'
+	printf "$fmt"  "$URL_SCHEME"  "$URL_USER"  "$URL_PASS"  "$URL_HOST"  "$URL_PORT"  "$URL_URI"  "$URL_ARGS"
 }
 

@@ -25,28 +25,28 @@ maketest() {
 	; do
 		local h1="${h1_url%%=*}"
 		local url="${h1_url#*=}"
-		local v="$(url_split_export "$url" "$fmt")"
+		local v="$(url_split_debug "$url" "$fmt")"
 		printf -- '-%s\n' "$url"
-		url_split_export "$url" "+$fmtinline"
+		url_split_debug "$url" "+$fmtinline"
 
 		continue
-
-		W "$..."
-		TESTVALUE "$url"
-
-		local h2="$(printf '%s\n' "$v" | md5sum)"
-		h2="${h2%% *}"
-		[ "$h1" = "$h2" ] && echo "ok: $url" || {
-			echo "FAIL: $url ($h1 != $h2)";
-			url_split_export "$url" "$fmt"
-		}
-		url_split_export "$url" --export
-		local url2="$(url_join_export)"
-		if [ "$url" != "$url2" ]; then
-			echo >&2 "- $url"
-			echo >&2 "+ $url2"
-		fi
-		#printf >&2 '%s\n' "$v"
+#
+#		W "$..."
+#		TESTVALUE "$url"
+#
+#		local h2="$(printf '%s\n' "$v" | md5sum)"
+#		h2="${h2%% *}"
+#		[ "$h1" = "$h2" ] && echo "ok: $url" || {
+#			echo "FAIL: $url ($h1 != $h2)";
+#			url_split_debug "$url" "$fmt"
+#		}
+#		url_split "$url"
+#		local url2="$(url_join)"
+#		if [ "$url" != "$url2" ]; then
+#			echo >&2 "- $url"
+#			echo >&2 "+ $url2"
+#		fi
+#		#printf >&2 '%s\n' "$v"
 done
 }
 
@@ -56,7 +56,7 @@ test_one() {
 	local want="$1"; shift
 	local fmtinline='scheme=%s user=%s pass=%s host=%s port=%s path=%s args=%s\n'
 	W "$want"
-	TESTVALUE "$(SUMVALUE "$(url_split_export "$url" "$fmtinline")")" "$url"
+	TESTVALUE "$(SUMVALUE "$(url_split_debug "$url" "$fmtinline")")" "$url"
 	N ++
 }
 
