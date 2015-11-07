@@ -50,48 +50,50 @@ url_parse_user_pass() {
 
 url_parse_uri_args() {
 	local uri_args="$1"
-	uri="${uri_args%%\?*}"			;# [<uri>]
-	args="${uri_args#*\?}"			;# [<args>]
+	uri="${uri_args%%\?*}"				;# [<uri>]
+	args="${uri_args#*\?}"				;# [<args>]
 	[ "$args" = "$uri" ] && args=""			;# no args
 }
-url_parse_port_uri_args_ipv6git() {
-	local port_uri_args="$1"
-	port=""
-	uri_args="${port_uri_args#*:}"                          ;# [<uri>[?<args>]]
-	[ "$uri_args" = "$port_uri_args" ] && uri_args=""       ;# empty uri
-}
+
 url_parse_port_uri_args_ipv6rfc() {
-	local port_uri_args="$1"
+	local url="$1"
+	host="${url%%\]*}"']'			;# FIXME: remove '[' and ']'
+	local port_uri_args="${url#*\]}"	;# cut after the first ']'
+
 	uri_args="${port_uri_args#*/}"				;# [<uri>[?<args>]]
 	[ "$uri_args" = "$port_uri_args" ] && uri_args="" || uri_args="/$uri_args"	;# empty uri_args
 	local host_port="${port_uri_args%%/*}"			;# <host>[:<port>]
 	if [ "$(printf '%1c' "$port_uri_args")" = ':' ]; then
 		port="${host_port##*:}"			;# [<port>]
 		[ "$port" = "$host_port" ] && port=""		;# empty port
-		#port="$port_uri_args%%/*}"			;# [<port>]
-		#[ "$port" = "$port_uri_args" ] && port=""	;# empty port
 	else
 		port=""
 	fi
 }
-url_parse_port_uri_args_ipv4git() {
-	local port_uri_args="$1"
-	# url = ...<host>:<uri...>
-	host="${url3%:*}"					;# <host>
-	port=""
-	uri_args="${url3#*:}"					;# [<uri>[?<args>]]
-	[ "$uri_args" = "$url3" ] && uri_args=""		;# empty uri
-}
 url_parse_port_uri_args_ipv4rfc() {
-	local port_uri_args="$1"
-	# url = ...<host>[:<port>]/<uri...>
-	uri_args="${url3#*/}"					;# [<uri>[?<args>]]
-	[ "$uri_args" = "$url3" ] && uri_args="" || uri_args="/$uri_args"	;# empty uri_args
+	local url="$1"						;# url = ...<host>[:<port>]/<uri...>
+	uri_args="${url#*/}"					;# [<uri>[?<args>]]
+	[ "$uri_args" = "$url" ] && uri_args="" || uri_args="/$uri_args"	;# empty uri_args
 
-	local host_port="${url3%%/*}"				;# <host>[:<port>]
+	local host_port="${url%%/*}"				;# <host>[:<port>]
 	host="${host_port%:*}"					;# <host>
 	port="${host_port##*:}"					;# [<port>]
 	[ "$port" = "$host_port" ] && port=""			;# empty port
+}
+
+url_parse_port_uri_args_git() {
+	local url="$1"
+	local isipv6="$2"
+
+	if $isipv6; then
+		# FIXME: trim '[' and ']' from host
+		host="${url%%\]*}"']'				;# <host>
+	else
+		host="${url%:*}"				;# <host>
+	fi
+	port=""							;# port (always) empty
+	uri_args="${url#*:}"					;# [<uri>[?<args>]]
+	[ "$uri_args" = "$url" ] && uri_args=""			;# empty uri
 }
 
 # potential bugs :
@@ -114,22 +116,20 @@ url_split() {
 
 	local url3="${url#*@}"				;# <host>[:<port>][<uri>[?<args>]]
 
+
+	local isipv6 ;# its IPv6 if url3 startwith '['
+	[ -z "${url3%%\[*}" ] && isipv6=true || isipv6=false
+
 	local host port uri_args
-	if [ "$(printf '%1c' "$url3")" = '[' ]; then
-		# IPv6
-		host="${url3%%]*}]"
-		local port_uri_args="${url3#*]}"
-		if [ -z "$scheme" ]; then
-			url_parse_port_uri_args_ipv6git "$port_uri_args"
-		else
-			url_parse_port_uri_args_ipv6rfc "$port_uri_args"
-		fi
+	if [ -z "$scheme" ]; then
+		url_parse_port_uri_args_git "$url3" $isipv6
 	else
-		# IPv4
-		if [ -z "$scheme" ]; then
-			url_parse_port_uri_args_ipv4git "$port_uri_args"
+		if $isipv6; then
+			# IPv6
+			url_parse_port_uri_args_ipv6rfc "$url3"
 		else
-			url_parse_port_uri_args_ipv4rfc "$port_uri_args"
+			# IPv4
+			url_parse_port_uri_args_ipv4rfc "$url3"
 		fi
 	fi
 
