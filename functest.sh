@@ -22,8 +22,10 @@ test_result() {
 			printf '[%s] test-%03d : %s%s' "$st" "$TESTSUITE_NUMBER" "$TESTSUITE_TITLE" "${*:+ ($*)}"
 			printf %20s ''
 			printf "wanted '%.8s' but got '%.8s'"\\n "$w" "$g"
+			return 1
 		;;
 	esac
+	return 0
 }
 
 DISABLE() { :; }

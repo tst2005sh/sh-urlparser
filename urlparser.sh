@@ -126,13 +126,13 @@ url_parse_port_uri_args_git() {
 	local isipv6="$2"
 
 	if $isipv6; then
-		# FIXME: trim '[' and ']' from host
-		host="${url%%\]*}"']'				;# <host>
+		host="${url%%\]*}"; host="${host#\[}"		;# <host> without '[' and ']'
+		uri_args="${url#*\]:}"
 	else
 		host="${url%%:*}"				;# <host>
+		uri_args="${url#*:}"				;# [<uri>[?<args>]]
 	fi
 	port=""							;# port (always) empty
-	uri_args="${url#*:}"					;# [<uri>[?<args>]]
 	[ "$uri_args" = "$url" ] && uri_args=""			;# empty uri
 }
 
@@ -174,7 +174,7 @@ url_split() {
 
 url_split_debug() {
 	local url="$1"; shift ;# https://user:pass@host:port/uri?args
-	local URL_SCHEME URL_USER URL_PASS URL_HOST URL_PORT URL_URI URL_ARGS
+	#local URL_SCHEME URL_USER URL_PASS URL_HOST URL_PORT URL_URI URL_ARGS
 	url_split "$url"
 
 	local fmt="$1"; shift
