@@ -41,7 +41,7 @@ maketest() {
 #			url_split_debug "$url" "$fmt"
 #		}
 #		url_split "$url"
-#		local url2="$(url_join)"
+#		local url2="$(url_join "rfc")"
 #		if [ "$url" != "$url2" ]; then
 #			echo >&2 "- $url"
 #			echo >&2 "+ $url2"
