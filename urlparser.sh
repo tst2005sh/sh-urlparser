@@ -35,7 +35,7 @@ url_join() {
 	}
 	r="${r}$URL_HOST"
 	[ -n "$URL_PORT"   ] && r="${r}:$URL_PORT"
-	[ -z "$URL_SCHEME" ] && [ -n "${URL_URI%%/*}" ] && r="${r}/"
+	[ -z "$URL_SCHEME" ] && [ -n "${URL_SCHEME%%/*}" ] && r="${r}/"
 	[ -n "$URL_URI"    ] && r="${r}$URL_URI"
 	[ -n "$URL_ARGS"   ] && r="${r}?$URL_ARGS"
 	printf '%s\n' "$r"
