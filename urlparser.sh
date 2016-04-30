@@ -30,7 +30,8 @@ url_join() {
 	case "$1" in
 		rfc|git) toformat="$1" ;;
 		*)
-			echo >&2 "invalid format $1. must be 'rfc' or 'git'."
+			URL_ERROR="invalid format $1. must be 'rfc' or 'git'."
+			echo >&2 "$URL_ERROR"
 			return 1
 	esac
 
@@ -38,7 +39,8 @@ url_join() {
 	case "$toformat" in
 		git)
 			if [ -n "$URL_PORT" ]; then
-				echo >&2 "git format does not support to provide a port number (URL_PORT us not empty)"
+				URL_ERROR='git format does not support to provide a port number'
+				echo >&2 "$URL_ERROR"
 				return 1
 			fi
 			r=""
